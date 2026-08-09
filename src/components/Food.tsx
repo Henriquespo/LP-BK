@@ -1,21 +1,20 @@
 import { useState } from 'react'
 import foodAvif from '../assets/generated/alimentacao-ilustrativa.avif'
 import foodJpg from '../assets/generated/alimentacao-ilustrativa.jpg'
-import { CONTACT, FOOD_FEATURES, MENUS } from '../data/site'
+import { trackEvent } from '../analytics'
+import { FOOD_FEATURES, MENUS } from '../data/site'
 import type { Menu } from '../data/site'
 import { card, container, section } from '../ui'
+import { useBudgetModal } from './budgetModal'
 import Icon from './Icon'
 import MenuModal from './MenuModal'
 import SectionHeading from './SectionHeading'
-
-const promoMessage = encodeURIComponent(
-  'Olá! Vi o site do Buffet Kawai e quero conhecer as promoções e opções de cardápio disponíveis. 🍕',
-)
 
 const featureTones = ['text-kawai-orange', 'text-[#77a916]', 'text-[#ed4f7f]']
 
 export default function Food() {
   const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null)
+  const { open: openBudget } = useBudgetModal()
 
   return (
     <section className={`${section} bg-kawai-cream`} id="cardapio">
@@ -78,14 +77,13 @@ export default function Food() {
               Três cardápios para celebrar do seu jeito
             </h3>
           </div>
-          <a
-            className="shrink-0 font-extrabold text-kawai-orange underline decoration-2 underline-offset-[5px]"
-            href={`${CONTACT.whatsapp.href}&text=${promoMessage}`}
-            target="_blank"
-            rel="noreferrer"
+          <button
+            className="shrink-0 cursor-pointer font-extrabold text-kawai-orange underline decoration-2 underline-offset-[5px]"
+            type="button"
+            onClick={() => openBudget('Promoções e cardápios')}
           >
             Ver promoções
-          </a>
+          </button>
         </div>
 
         <div className="mt-7 grid gap-4 lg:grid-cols-3">
@@ -94,7 +92,10 @@ export default function Food() {
               aria-label={`Abrir cardápio ${menu.name}`}
               className={`${card} group relative min-h-[178px] w-full self-start overflow-hidden p-6 text-left transition duration-300 hover:-translate-y-1 hover:border-kawai-orange/30 hover:shadow-[0_18px_38px_rgba(92,52,19,.12)] lg:min-h-[210px]`}
               key={menu.id}
-              onClick={() => setSelectedMenu(menu)}
+              onClick={() => {
+                trackEvent('view_menu', { menu_name: menu.name })
+                setSelectedMenu(menu)
+              }}
               type="button"
             >
               <span className="absolute -right-9 -top-9 grid size-28 place-items-end rounded-full bg-kawai-orange/[0.055] p-5 text-kawai-orange transition duration-300 group-hover:scale-110 group-hover:bg-kawai-orange/10">

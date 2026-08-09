@@ -31,12 +31,12 @@ export default function Contato() {
               </div>
             </article>
 
-            <article className={`${card} flex gap-3.5 p-4 shadow-none`}>
+            <article className={`${card} flex gap-3.5 p-4 shadow-none sm:col-span-2`}>
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-kawai-cream text-kawai-orange [&>svg]:size-5"><Icon name="mail" /></span>
               <div>
                 <h3 className="font-display text-base font-bold">E-mail</h3>
                 <p className="mt-1.5 text-xs leading-relaxed text-kawai-brown">Envie sua dúvida ou solicitação</p>
-                <a className="mt-2 block break-all text-xs font-extrabold text-kawai-orange underline underline-offset-4" href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
+                <a className="mt-2 inline-block text-xs font-extrabold text-kawai-orange underline underline-offset-4" href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
               </div>
             </article>
 

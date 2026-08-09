@@ -63,7 +63,7 @@ export const FAQS = [
   {
     question: 'Quais opções de cardápio estão disponíveis?',
     answer:
-      'O Buffet Kawai trabalha com Festa de Pizza, Macarronada e Pratos Quentes. Todos incluem salgadinhos, bebidas, bolo e doces conforme o cardápio apresentado no site.',
+      'O Buffet Kawai trabalha com Festa de Pizza, Massas e Pratos Quentes. Todos incluem salgadinhos, bebidas, bolo e doces conforme o cardápio apresentado no site.',
   },
   {
     question: 'Como funciona o rodízio de pizzas?',
@@ -124,7 +124,7 @@ export const MENUS: Menu[] = [
   },
   {
     id: 'massas',
-    name: 'Macarronada',
+    name: 'Massas',
     tagline: 'Rodízio de massas e salgados',
     highlight: 'Para quem ama massa fresquinha',
     items: [

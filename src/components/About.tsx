@@ -1,11 +1,12 @@
 import { container, section } from '../ui'
+import YearsCounter from './YearsCounter'
 
 export default function About() {
   return (
     <section className={`${section} bg-kawai-paper pb-14 lg:pb-20`} id="buffet">
       <div className={`${container} grid items-center gap-8 md:grid-cols-[minmax(150px,.32fr)_minmax(0,1.68fr)] lg:gap-[86px]`}>
         <div className="flex items-baseline justify-center gap-3.5 border-b border-kawai-line pb-7 text-center md:block md:border-b-0 md:border-r md:pb-0 md:pr-10">
-          <strong className="block font-display text-[clamp(72px,9vw,126px)] font-bold leading-[.8] tracking-[-0.08em] text-kawai-orange">18</strong>
+          <YearsCounter />
           <span className="mt-3 block text-[11px] font-extrabold uppercase tracking-[0.12em] text-kawai-brown">anos celebrando</span>
         </div>
         <div>

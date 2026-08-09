@@ -24,6 +24,61 @@ npm run serve
 
 A porta do servidor de produção pode ser alterada com a variável `PORT` (ex.: `PORT=8080 npm run serve`).
 
+## Google Analytics (GA4)
+
+Copie `.env.example` para `.env` e preencha o ID de medição:
+
+```
+VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+```
+
+O ID fica em **Admin > Fluxos de dados > Web** no GA4. Sem a variável, nenhum script
+do Google é carregado e todos os eventos viram no-op — por isso o padrão em
+desenvolvimento é deixar vazio, para não misturar testes com os dados reais. Como a
+variável é lida em build, é preciso rebuildar depois de alterá-la.
+
+Eventos enviados (`src/analytics.ts`):
+
+| Evento | Quando | Parâmetros |
+| --- | --- | --- |
+| `whatsapp_cta_click` | Qualquer CTA que abre o modal de orçamento | `cta_intent` |
+| `generate_lead` | Formulário enviado (evento recomendado do GA4) | `cta_intent`, `form_variant`, `tem_data`, `tem_convidados`, `rodizio` |
+| `view_menu` | Cardápio aberto | `menu_name` |
+| `whatsapp_direct_click` | Link direto de WhatsApp (topo, contato, rodapé) | `link_url` |
+| `email_click` | Link `mailto:` | `link_url` |
+| `maps_click` | Link do Google Maps | `link_url` |
+
+Marque `generate_lead` como conversão no GA4 (**Admin > Eventos**) para medir o funil
+até o WhatsApp.
+
+### Consentimento (LGPD)
+
+O `gtag.js` só é baixado depois de consentimento explícito — antes disso nenhum script
+de terceiro entra na página e nenhum cookie é gravado. O banner (`ConsentBanner`) aparece
+na primeira visita quando há ID configurado; "Recusar" e "Aceitar" têm o mesmo peso
+visual e a mesma área de toque, como a lei exige de uma escolha livre.
+
+A decisão fica em `localStorage` na chave `kawai:consentimento-analytics` e pode ser
+revista a qualquer momento pelo botão **Preferências de cookies** no rodapé. Ao aceitar,
+o Consent Mode v2 é configurado negando tudo por padrão e liberando apenas
+`analytics_storage` — publicidade permanece negada, já que medição de audiência é o
+único uso declarado no banner.
+
+Sem `VITE_GA_MEASUREMENT_ID` não há coleta, então o banner e o botão do rodapé nem são
+renderizados.
+
+### Política de privacidade
+
+Fica em `/politica-de-privacidade`, linkada no rodapé de todas as páginas. É uma rota
+real: link direto e refresh funcionam porque o Express devolve o `index.html` em
+qualquer caminho. O `router.ts` cobre as duas páginas sem trazer biblioteca de rotas.
+
+O texto foi escrito a partir do que o site de fato coleta — inclusive o detalhe de que
+o formulário não envia nada para servidor próprio, só monta a mensagem do WhatsApp.
+**Ainda assim é um documento base e precisa de revisão jurídica antes de publicar.**
+Faltam, por não estarem disponíveis no projeto: razão social e CNPJ, nome do encarregado
+(DPO) exigido pelo artigo 41 da LGPD, e os prazos de retenção efetivamente praticados.
+
 ## Estrutura
 
 ```
@@ -31,7 +86,9 @@ A porta do servidor de produção pode ser alterada com a variável `PORT` (ex.:
 ├── vite.config.ts             # plugins React e Tailwind CSS v4
 ├── server/index.js            # servidor Express que serve o build de /dist
 └── src/
-    ├── App.tsx                # monta a landing page em fluxo contínuo
+    ├── App.tsx                # alterna entre a landing e a política de privacidade
+    ├── analytics.ts           # carga condicional do GA4 e disparo de eventos
+    ├── router.ts              # roteamento mínimo das duas páginas, sem dependência
     ├── index.css              # import Tailwind, tema da marca e base acessível
     ├── ui.ts                  # utilitários compartilhados de container, botões e cards
     ├── assets/                # fotos reais, fallbacks e imagens ilustrativas otimizadas
@@ -49,6 +106,8 @@ A porta do servidor de produção pode ser alterada com a variável `PORT` (ex.:
         ├── Depoimentos         # avaliações reais de clientes
         ├── FAQ                 # respostas confirmadas em acordeão nativo
         ├── Orcamento           # CTA e formulário opcional que prepara a mensagem do WhatsApp
+        ├── PrivacyPolicy       # página /politica-de-privacidade
+        ├── ConsentBanner       # consentimento LGPD que libera o analytics
         ├── Contato             # endereço, horários, canais e mapa
         ├── Footer              # navegação, contatos, redes e parceria
         ├── Icon                # mapeamento central do sistema Lucide + marca do WhatsApp

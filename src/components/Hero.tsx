@@ -1,15 +1,14 @@
 import heroAvif from '../assets/hero-photo.avif'
 import heroJpg from '../assets/hero-photo.jpg'
 import mascotPng from '../assets/mascote-kawai-original-transparent.png'
-import { CONTACT, TRUST_ITEMS } from '../data/site'
+import { TRUST_ITEMS } from '../data/site'
 import { container } from '../ui'
+import { useBudgetModal } from './budgetModal'
 import Icon from './Icon'
 
-const budgetMessage = encodeURIComponent(
-  'Olá! Quero conhecer melhor o Buffet Kawai e receber um orçamento para uma festa. 🎉',
-)
-
 export default function Hero() {
+  const { open: openBudget } = useBudgetModal()
+
   return (
     <section className="brand-hero" id="home">
       <div className="brand-hero-confetti brand-hero-confetti--left" aria-hidden="true">✦</div>
@@ -28,15 +27,14 @@ export default function Hero() {
           </p>
 
           <div className="brand-hero-actions">
-            <a
-              className="brand-hero-primary"
-              href={`${CONTACT.whatsapp.href}&text=${budgetMessage}`}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              className="brand-hero-primary cursor-pointer"
+              type="button"
+              onClick={() => openBudget('Orçamento')}
             >
               Fazer orçamento
               <Icon name="arrow-right" />
-            </a>
+            </button>
             <a className="brand-hero-secondary" href="#estrutura">
               <span><Icon name="arrow-right" /></span>
               Conheça o buffet

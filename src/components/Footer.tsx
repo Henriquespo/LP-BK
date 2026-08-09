@@ -1,6 +1,8 @@
+import { analyticsEnabled, requestConsentReview } from '../analytics'
 import logoAvif from '../assets/logo.avif'
 import logoPng from '../assets/logo-compact.png'
 import { CONTACT, NAV_ITEMS } from '../data/site'
+import { navigate, ROUTES, useAnchorPrefix } from '../router'
 import { container } from '../ui'
 import Icon from './Icon'
 
@@ -9,6 +11,8 @@ const partnerMessage = encodeURIComponent(
 )
 
 export default function Footer() {
+  const anchor = useAnchorPrefix()
+
   return (
     <footer className="bg-[#242424] text-white/70">
       <div className={`${container} grid gap-10 py-16 sm:grid-cols-2 lg:grid-cols-[1.2fr_.8fr_1.15fr_1fr] lg:gap-14`}>
@@ -34,11 +38,11 @@ export default function Footer() {
         <div>
           <h3 className="font-display text-base font-bold text-white">Navegação</h3>
           <ul className="mt-5 grid list-none gap-3 p-0 text-xs">
-            <li><a href="#home">Home</a></li>
+            <li><a href={`${anchor}#home`}>Home</a></li>
             {NAV_ITEMS.map((item) => (
-              <li key={item.href}><a href={item.href}>{item.label}</a></li>
+              <li key={item.href}><a href={`${anchor}${item.href}`}>{item.label}</a></li>
             ))}
-            <li><a href="#duvidas">Dúvidas frequentes</a></li>
+            <li><a href={`${anchor}#duvidas`}>Dúvidas frequentes</a></li>
           </ul>
         </div>
 
@@ -67,8 +71,30 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-white/10 px-4 py-4 text-center">
+      <div className="flex flex-col items-center justify-center gap-x-4 gap-y-1 border-t border-white/10 px-4 py-4 text-center sm:flex-row">
         <p className="text-[11px]">© {new Date().getFullYear()} Buffet Kawai. Todos os direitos reservados.</p>
+        <a
+          className="min-h-11 content-center text-[11px] underline underline-offset-4 transition hover:text-kawai-yellow"
+          href={ROUTES.privacidade}
+          onClick={(event) => {
+            // Navega sem recarregar, mas preserva o href para abrir em nova aba,
+            // copiar o link e para os buscadores encontrarem a página.
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return
+            event.preventDefault()
+            navigate(ROUTES.privacidade)
+          }}
+        >
+          Política de privacidade
+        </a>
+        {analyticsEnabled && (
+          <button
+            className="min-h-11 cursor-pointer text-[11px] underline underline-offset-4 transition hover:text-kawai-yellow"
+            onClick={requestConsentReview}
+            type="button"
+          >
+            Preferências de cookies
+          </button>
+        )}
       </div>
     </footer>
   )

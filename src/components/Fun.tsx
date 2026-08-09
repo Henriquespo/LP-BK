@@ -1,14 +1,13 @@
 import playAreaPhoto from '../assets/photos/brinquedao.jpeg'
-import { CONTACT, FUN_POINTS } from '../data/site'
+import { FUN_POINTS } from '../data/site'
 import { buttonOrange, container, section } from '../ui'
+import { useBudgetModal } from './budgetModal'
 import Icon from './Icon'
 import SectionHeading from './SectionHeading'
 
-const attractionsMessage = encodeURIComponent(
-  'Olá! Gostaria de saber quais brinquedos e atrações estarão disponíveis para a minha data. 🎈',
-)
-
 export default function Fun() {
+  const { open: openBudget } = useBudgetModal()
+
   return (
     <section className={`${section} bg-kawai-paper`} id="atracoes">
       <div className={container}>
@@ -52,15 +51,14 @@ export default function Fun() {
                 </div>
               </article>
             ))}
-            <a
-              className={`${buttonOrange} mt-7 justify-self-start`}
-              href={`${CONTACT.whatsapp.href}&text=${attractionsMessage}`}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              className={`${buttonOrange} mt-7 cursor-pointer justify-self-start`}
+              type="button"
+              onClick={() => openBudget('Brinquedos e atrações')}
             >
               <Icon name="whatsapp" />
               Consultar atrações
-            </a>
+            </button>
           </div>
         </div>
       </div>

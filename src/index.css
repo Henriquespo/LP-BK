@@ -13,6 +13,7 @@
   --color-kawai-line: rgba(73, 47, 22, 0.12);
   --font-display: "Fredoka", sans-serif;
   --font-sans: "Inter", sans-serif;
+  --animate-consent-enter: consent-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-menu-reveal: menu-reveal 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-menu-page-left: menu-page-left 560ms 80ms cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-menu-page-right: menu-page-right 560ms 80ms cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -66,6 +67,63 @@
   }
 }
 
+@keyframes kawai-anniversary-pop {
+  0% {
+    transform: scale(1);
+  }
+
+  38% {
+    transform: scale(1.11) rotate(-1.5deg);
+  }
+
+  70% {
+    transform: scale(0.98) rotate(0.6deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+/* Sai de trás do número, sobe em leque e cai com giro até sumir. */
+@keyframes kawai-confetti-fly {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) rotate(0deg) scale(0.35);
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  40% {
+    transform: translate3d(calc(-50% + var(--dx) * 0.62), calc(-50% + var(--rise)), 0)
+      rotate(calc(var(--rot) * 0.4)) scale(1);
+  }
+
+  78% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(-50% + var(--dx)), calc(-50% + var(--fall)), 0) rotate(var(--rot))
+      scale(0.85);
+  }
+}
+
+@keyframes consent-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes hero-visual-enter {
   from {
     opacity: 0;
@@ -89,7 +147,17 @@
     background: rgb(255 253 248 / 0.97);
     box-shadow: 0 8px 26px rgb(34 56 75 / 0.08);
     backdrop-filter: blur(18px);
-    transition: transform 300ms ease;
+    /* Volta com uma curva que desacelera bem no fim, para "assentar" no lugar. */
+    transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translateY(0);
+    will-change: transform;
+  }
+
+  .brand-header--hidden {
+    /* Sai mais rápido e mais reto do que volta: sumir não precisa de destaque. */
+    transition: transform 260ms cubic-bezier(0.4, 0.02, 0.5, 1);
+    /* O deslocamento extra tira a sombra junto com a barra. */
+    transform: translateY(calc(-100% - 30px));
   }
 
   .brand-topbar {
@@ -891,6 +959,43 @@
     transform: rotate(-17deg);
   }
 
+  .kawai-anniversary {
+    position: relative;
+    display: block;
+    min-width: 2ch;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+
+  .kawai-anniversary-value {
+    position: relative;
+    z-index: 2;
+  }
+
+  .kawai-anniversary-value--pop {
+    animation: kawai-anniversary-pop 620ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .kawai-confetti {
+    position: absolute;
+    z-index: 1;
+    top: 46%;
+    left: 50%;
+    display: block;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .kawai-confetti > span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    opacity: 0;
+    animation: kawai-confetti-fly var(--duration) var(--delay) cubic-bezier(0.22, 0.55, 0.4, 1) both;
+  }
+
   .restaurant-menu-dialog {
     --menu-blue: #1559c5;
     --menu-orange: #f45c0b;
@@ -1235,7 +1340,8 @@
     line-height: 1.5;
   }
 
-  .restaurant-menu-note a {
+  .restaurant-menu-note a,
+  .restaurant-menu-note button {
     display: inline-flex;
     min-height: 40px;
     align-items: center;
@@ -1253,7 +1359,8 @@
     transition: color 180ms ease, background-color 180ms ease, transform 180ms ease;
   }
 
-  .restaurant-menu-note a:hover {
+  .restaurant-menu-note a:hover,
+  .restaurant-menu-note button:hover {
     color: var(--menu-orange);
     background: transparent;
     transform: translateY(-1px);

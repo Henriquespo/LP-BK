@@ -1,16 +1,15 @@
-import { CONTACT, PROCESS_STEPS } from '../data/site'
+import { PROCESS_STEPS } from '../data/site'
 import { card, container, section } from '../ui'
+import { useBudgetModal } from './budgetModal'
 import Icon from './Icon'
 import SectionHeading from './SectionHeading'
-
-const processMessage = encodeURIComponent(
-  'Olá! Quero começar a organizar uma festa no Buffet Kawai. Pode me ajudar? 🎉',
-)
 
 const stepIconTones = ['bg-[#f2f9df] text-[#69a616]', 'bg-[#fff2d9] text-kawai-orange', 'bg-[#ffe9f1] text-[#e84a7b]']
 const stepClass = `${card} relative min-h-[242px] p-7 text-center transition duration-200 hover:-translate-y-1 hover:shadow-[0_20px_44px_rgba(73,47,22,.12)] motion-reduce:transition-none motion-reduce:hover:translate-y-0`
 
 export default function Process() {
+  const { open: openBudget } = useBudgetModal()
+
   return (
     <section className={`${section} bg-white`} id="como-funciona">
       <div className={container}>
@@ -35,15 +34,14 @@ export default function Process() {
             )
 
             return index === 0 ? (
-              <a
-                className={stepClass}
-                href={`${CONTACT.whatsapp.href}&text=${processMessage}`}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                className={`${stepClass} cursor-pointer`}
+                type="button"
+                onClick={() => openBudget('Começar a organizar a festa')}
                 key={step.number}
               >
                 {content}
-              </a>
+              </button>
             ) : (
               <article className={stepClass} key={step.number}>{content}</article>
             )

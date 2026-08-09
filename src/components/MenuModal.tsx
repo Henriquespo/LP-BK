@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { CONTACT } from '../data/site'
 import type { Menu } from '../data/site'
+import { useBudgetModal } from './budgetModal'
 import Icon from './Icon'
 
 interface MenuModalProps {
@@ -10,6 +10,7 @@ interface MenuModalProps {
 
 export default function MenuModal({ menu, onClose }: MenuModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const { open: openBudget } = useBudgetModal()
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -23,11 +24,13 @@ export default function MenuModal({ menu, onClose }: MenuModalProps) {
 
   const halfway = Math.ceil(menu.items.length / 2)
   const pages = [menu.items.slice(0, halfway), menu.items.slice(halfway)]
-  const message = encodeURIComponent(
-    `Olá! Vi o cardápio ${menu.name} no site do Buffet Kawai e gostaria de saber mais.`,
-  )
 
   const closeDialog = () => dialogRef.current?.close()
+
+  const requestMenu = () => {
+    closeDialog()
+    openBudget(`Cardápio ${menu.name}`)
+  }
 
   return (
     <dialog
@@ -113,14 +116,10 @@ export default function MenuModal({ menu, onClose }: MenuModalProps) {
               <p>
                 Consulte disponibilidade, condições e personalizações diretamente com nossa equipe.
               </p>
-              <a
-                href={`${CONTACT.whatsapp.href}&text=${message}`}
-                rel="noreferrer"
-                target="_blank"
-              >
+              <button className="cursor-pointer" type="button" onClick={requestMenu}>
                 <Icon className="size-4" name="whatsapp" />
                 Quero este cardápio
-              </a>
+              </button>
             </div>
 
             <footer className="restaurant-menu-folio">

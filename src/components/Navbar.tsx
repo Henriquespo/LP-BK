@@ -1,58 +1,78 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import logoAvif from '../assets/logo.avif'
 import logoPng from '../assets/logo-compact.png'
 import { CONTACT, NAV_ITEMS } from '../data/site'
+import { useAnchorPrefix } from '../router'
 import { container } from '../ui'
+import { useBudgetModal } from './budgetModal'
 import Icon from './Icon'
 
+/** Perto do topo a barra fica sempre visível. */
+const ALWAYS_VISIBLE_UNTIL = 80
+/** Só começa a se esconder depois que a hero saiu de vista. */
 const HIDE_AFTER = 180
-const DIRECTION_THRESHOLD = 10
+/** Descer exige intenção clara; subir revela quase na hora. */
+const HIDE_INTENT = 64
+const SHOW_INTENT = 12
 
 function useNavbarScroll() {
   const [hidden, setHidden] = useState(false)
-  const lastY = useRef(0)
-  const distance = useRef(0)
 
   useEffect(() => {
-    lastY.current = window.scrollY
+    let lastY = window.scrollY
+    let intent = 0
+    let frame = 0
 
-    const onScroll = () => {
-      const currentY = Math.max(window.scrollY, 0)
-      const delta = currentY - lastY.current
+    const evaluate = () => {
+      frame = 0
 
-      if (currentY < 80) {
+      // Limitar ao scroll real descarta o repique de overscroll do iOS/macOS,
+      // que senão gera deltas fantasmas e faz a barra piscar.
+      const maxY = Math.max(document.documentElement.scrollHeight - window.innerHeight, 0)
+      const currentY = Math.min(Math.max(window.scrollY, 0), maxY)
+      const delta = currentY - lastY
+      lastY = currentY
+
+      if (currentY <= ALWAYS_VISIBLE_UNTIL) {
+        intent = 0
         setHidden(false)
-        distance.current = 0
-      } else if (delta !== 0) {
-        const directionChanged = Math.sign(delta) !== Math.sign(distance.current)
-        distance.current = directionChanged ? delta : distance.current + delta
-
-        if (distance.current > DIRECTION_THRESHOLD && currentY > HIDE_AFTER) {
-          setHidden(true)
-          distance.current = 0
-        } else if (distance.current < -DIRECTION_THRESHOLD) {
-          setHidden(false)
-          distance.current = 0
-        }
+        return
       }
 
-      lastY.current = currentY
+      // Ao trocar de direção o acumulado zera, para a intenção não herdar
+      // o movimento anterior e disparar antes da hora.
+      if (delta > 0 !== intent > 0) intent = 0
+      intent += delta
+
+      if (intent > HIDE_INTENT && currentY > HIDE_AFTER) {
+        intent = 0
+        setHidden(true)
+      } else if (intent < -SHOW_INTENT) {
+        intent = 0
+        setHidden(false)
+      }
+    }
+
+    // Um cálculo por quadro: o scroll dispara muito mais que isso.
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(evaluate)
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(frame)
+    }
   }, [])
 
   return hidden
 }
 
-const budgetMessage = encodeURIComponent(
-  'Olá! Vi o site do Buffet Kawai e gostaria de receber um orçamento para uma festa. 🎉',
-)
-
 export default function Navbar() {
   const hidden = useNavbarScroll()
   const [menuOpen, setMenuOpen] = useState(false)
+  const { open: openBudget } = useBudgetModal()
+  const anchor = useAnchorPrefix()
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -63,9 +83,7 @@ export default function Navbar() {
   }, [])
 
   return (
-    <header
-      className={`brand-header ${hidden && !menuOpen ? '-translate-y-[110%]' : 'translate-y-0'}`}
-    >
+    <header className={`brand-header ${hidden && !menuOpen ? 'brand-header--hidden' : ''}`}>
       <div className="brand-topbar">
         <div className={`${container} brand-topbar-inner`}>
           <p>
@@ -86,7 +104,7 @@ export default function Navbar() {
       </div>
 
       <nav className={`${container} brand-navbar`} aria-label="Navegação principal">
-        <a href="#home" className="brand-nav-logo" aria-label="Buffet Kawai — início">
+        <a href={`${anchor}#home`} className="brand-nav-logo" aria-label="Buffet Kawai — início">
           <picture>
             <source srcSet={logoAvif} type="image/avif" />
             <img src={logoPng} width="150" height="82" alt="Buffet Kawai" />
@@ -96,20 +114,15 @@ export default function Navbar() {
         <ul className="brand-nav-links">
           {NAV_ITEMS.map((item) => (
             <li key={item.href}>
-              <a href={item.href}>{item.label}</a>
+              <a href={`${anchor}${item.href}`}>{item.label}</a>
             </li>
           ))}
         </ul>
 
-        <a
-          className="brand-nav-cta"
-          href={`${CONTACT.whatsapp.href}&text=${budgetMessage}`}
-          target="_blank"
-          rel="noreferrer"
-        >
+        <button className="brand-nav-cta cursor-pointer" type="button" onClick={() => openBudget('Orçamento')}>
           Fazer orçamento
           <Icon name="arrow-right" />
-        </a>
+        </button>
 
         <button
           className="brand-menu-toggle"
@@ -134,23 +147,24 @@ export default function Navbar() {
         <ul>
           {NAV_ITEMS.map((item) => (
             <li key={item.href}>
-              <a href={item.href} onClick={() => setMenuOpen(false)}>
+              <a href={`${anchor}${item.href}`} onClick={() => setMenuOpen(false)}>
                 {item.label}
                 <Icon name="arrow-right" />
               </a>
             </li>
           ))}
         </ul>
-        <a
-          className="brand-nav-cta"
-          href={`${CONTACT.whatsapp.href}&text=${budgetMessage}`}
-          target="_blank"
-          rel="noreferrer"
-          onClick={() => setMenuOpen(false)}
+        <button
+          className="brand-nav-cta cursor-pointer"
+          type="button"
+          onClick={() => {
+            setMenuOpen(false)
+            openBudget('Orçamento')
+          }}
         >
           Fazer orçamento
           <Icon name="arrow-right" />
-        </a>
+        </button>
       </div>
     </header>
   )
